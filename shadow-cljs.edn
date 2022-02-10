@@ -1,11 +1,14 @@
 ;; shadow-cljs configuration
 {:source-paths
  ["src/dev"
-  "src/main"
+  "src/agold"
   "src/test"]
 
  :dependencies
- []
+ [[instaparse "1.4.10"]]
 
  :builds
- {}}
+ {:script
+  {:target :node-script
+   :main nzparse/-main
+   :output-to "out/script/nzparse.js"}}}
