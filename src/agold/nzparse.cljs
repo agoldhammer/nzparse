@@ -1,33 +1,36 @@
 (ns nzparse
-  (:require [instaparse.core :as insta])
-  (:gen-class))
+  (:require [instaparse.core :as insta]
+            [process :as pr]))
 
-(def query1
-  "Find in [worda wordb] from last 25 hours;")
+(pr/on "uncaughtException", (fn [err origin]
+                              (println "Uncaught Exception " err origin)))
 
-(def query2
-  "Find in [ worda wordb $topic ] from last 2 hours;")
+;; (def query1
+;;   "Find in [worda wordb] from last 25 hours;")
 
-(def query3
-  "Define $fra [Macron Castex];")
+;; (def query2
+;;   "Find in [ worda wordb $topic ] from last 2 hours;")
 
-(def query4
-  "Find in [ worda wordb
-   $fra ] from last 2 hours;")
+;; (def query3
+;;   "Define $fra [Macron Castex];")
 
-(def query5
-  "Find in [ worda wordb
-   $topic ] from last 2 hours ;")
+;; (def query4
+;;   "Find in [ worda wordb
+;;    $fra ] from last 2 hours;")
 
-(def query6
-  "Define $felite [$fra Zemmour];")
+;; (def query5
+;;   "Find in [ worda wordb
+;;    $topic ] from last 2 hours ;")
 
-(def broken1
-  "Define fra [yes no];")
+;; (def query6
+;;   "Define $felite [$fra Zemmour];")
 
-(def broken2
-  "Find in [ worda wordb
-   $topic ] from last 2 hours") ;; no semi
+;; (def broken1
+;;   "Define fra [yes no];")
+
+;; (def broken2
+;;   "Find in [ worda wordb
+;;    $topic ] from last 2 hours") ;; no semi
 
 (def parse
   (insta/parser
@@ -65,15 +68,14 @@
   "deal with parse error in node"
   [node msg]
   (println "Error:" node)
-  (throw (Exception. (str "parse error: " msg))))
+  (throw (ex-info (str "Parse error: " msg) {:node node})))
 
 (defn build-findlast
   "reducing fn to build a findlast command"
   [acc node]
   (let [tag (:tag node)
         content (first (:content node))
-        symbol (get @symbol-table content)
-        _ (println "build-findlast" tag content symbol)]
+        symbol (get @symbol-table content)]
     (when (and (= tag :SYMBOL) (nil? symbol))
       (parse-error node "symbol not defined"))
     (condp = tag
@@ -130,7 +132,13 @@
         :FINDLAST (analyze-findlast content)
         :DEF (analyze-def content)
         "No matching node type"))
-    (catch Exception e (println (.getMessage e)))))
+    (catch js/Error e [(ex-message e)])))
+
+(defn setup-sym-table-for-test!
+  "set up the symbol table for resting"
+  []
+  (analyze (parse "Define $fra [Macron Castex];"))
+  (analyze (parse "Define $ger [Germany France];")))
 
 
 (defn -main
@@ -140,32 +148,11 @@
 
 
 (comment
-  (parse query1)
-  (analyze (parse query1))
-  (parse query2)
-  (analyze (parse query2))
-  (parse query3)
-  (analyze (parse query3))
-  (println @symbol-table)
-  (reset-symbol-table!)
-  (parse query4)
-  (analyze (parse query4))
-  (get @symbol-table "$nonexistent")
+
   @symbol-table
+  (reset-symbol-table!)
+  (setup-sym-table-for-test!)
   (analyze (parse "Find in [ $nonexistent ] from last 2 hours;"))
-  (analyze (parse "Define $topic [Germany France];"))
-  (parse query5)
-  (parse query6)
-  (analyze (parse "Find in [$fra $topic] from last 12 hours;"))
-  (parse broken1)
-  (analyze (parse broken1))
-  (analyze (parse broken2))
-  (def queries [query1 query2 query3 query4 query5 query6])
-  (mapv parse queries)
-  (get (mapv parse queries) 5)
-
-  (mapv parse [broken1 broken2])
-  (pr-str {:a 1})
-
-  (doseq [item (:content (parse query1))]
-    (println item)))
+  (analyze (parse "Find in [$fra] from last 24 hours;"))
+  (analyze (parse "Find in [$fra $nonexistent] from last 12 hours;"))
+  (analyze (parse "Find in [$fra $ger Biden] from last 6 hours;")))

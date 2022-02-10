@@ -11,4 +11,6 @@
  {:script
   {:target :node-script
    :main nzparse/-main
-   :output-to "out/script/nzparse.js"}}}
+   :output-to "out/script/nzparse.js"
+   :devtools {:repl-init-ns nzparse
+              :repl-pprint true}}}}

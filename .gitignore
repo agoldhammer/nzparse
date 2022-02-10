@@ -1,12 +1,4 @@
 node_modules/
-public/js
-
-/target
-/checkouts
-/src/gen
-
-pom.xml
-pom.xml.asc
 *.iml
 *.jar
 *.log
@@ -21,3 +13,6 @@ pom.xml.asc
 package-lock.json
 .clj-kondo
 .lsp
+.calva
+out/
+*.code-workspace
