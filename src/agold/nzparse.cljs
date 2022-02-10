@@ -5,33 +5,6 @@
 (pr/on "uncaughtException", (fn [err origin]
                               (println "Uncaught Exception " err origin)))
 
-;; (def query1
-;;   "Find in [worda wordb] from last 25 hours;")
-
-;; (def query2
-;;   "Find in [ worda wordb $topic ] from last 2 hours;")
-
-;; (def query3
-;;   "Define $fra [Macron Castex];")
-
-;; (def query4
-;;   "Find in [ worda wordb
-;;    $fra ] from last 2 hours;")
-
-;; (def query5
-;;   "Find in [ worda wordb
-;;    $topic ] from last 2 hours ;")
-
-;; (def query6
-;;   "Define $felite [$fra Zemmour];")
-
-;; (def broken1
-;;   "Define fra [yes no];")
-
-;; (def broken2
-;;   "Find in [ worda wordb
-;;    $topic ] from last 2 hours") ;; no semi
-
 (def parse
   (insta/parser
    "<S> = FINDLAST | DEF
