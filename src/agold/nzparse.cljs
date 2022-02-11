@@ -28,8 +28,6 @@
    :auto-whitespace :standard
    :output-format :enlive))
 
-(comment
-  #'19|20[0-9]{2}-0|1[0-9]-[0-3][0-9]')
 (def symbol-table (atom {}))
 
 (defn reset-symbol-table!
