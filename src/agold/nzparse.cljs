@@ -51,12 +51,12 @@
   [acc node]
   (let [tag (:tag node)
         content (first (:content node))
-        symbol (get @symbol-table content)]
-    (when (and (= tag :SYMBOL) (nil? symbol))
+        symbol-content (get @symbol-table content)]
+    (when (and (= tag :SYMBOL) (nil? symbol-content))
       (parse-error node "symbol not defined"))
     (condp = tag
       :WORD (update-in acc [:words] conj content)
-      :SYMBOL (update-in acc [:words] into symbol)
+      :SYMBOL (update-in acc [:words] into symbol-content)
       :TUNITS (assoc-in acc [:time] content))))
 
 ;; FINDLAST content looks like this
@@ -124,7 +124,6 @@
 
 
 (comment
-
   @symbol-table
   (reset-symbol-table!)
   (setup-sym-table-for-test!)
