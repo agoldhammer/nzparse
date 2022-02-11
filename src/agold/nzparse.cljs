@@ -7,24 +7,29 @@
 
 (def parse
   (insta/parser
-   "<S> = FINDLAST | DEF
+   "<S> = FINDLAST | DEF | DATWEEN | DTTWEEN
     FINDLAST = <FINDIN> <LBKT> (SYMBOL | WORD )+ <RBKT>
-       <FROMLAST> HOURS <REST> <SEMI>
+       <FROMLAST> TUNITS <SEMI>
     LBKT = '['
     RBKT = ']'
     SEMI = ';'
     FINDIN = 'Find in '
     FROMLAST = 'from last '
     WORD = #'[a-zA-Z0-9]+'
-    SYMBOL = #'\\$[a-zA-Z0-9]+'
-    HOURS = #'\\d+'
-    REST = ' hours'
+    SYMBOL = #'\\$\\w+'
+    TUNITS = #'\\d+[hmd]'
     DEF = <DEFPFX> SYMBOL <LBKT> (SYMBOL | WORD)+ <RBKT> <SEMI>
     DEFPFX = 'Define '
+    DATWEEN = <'between'> DATE <'and'> DATE <SEMI>
+    DTTWEEN = <'between'> DATE TIME <'and'> DATE TIME <SEMI>
+    DATE = #'[12][09][0-9]{2}-[01]\\d-\\d{2}'
+    TIME = #'T?[012][0-9]:\\d{2}:\\d{2}z?'
     "
    :auto-whitespace :standard
    :output-format :enlive))
 
+(comment
+  #'19|20[0-9]{2}-0|1[0-9]-[0-3][0-9]')
 (def symbol-table (atom {}))
 
 (defn reset-symbol-table!
@@ -54,7 +59,7 @@
     (condp = tag
       :WORD (update-in acc [:words] conj content)
       :SYMBOL (update-in acc [:words] into symbol)
-      :HOURS (assoc-in acc [:time] content))))
+      :TUNITS (assoc-in acc [:time] content))))
 
 ;; FINDLAST content looks like this
 ;; ({:tag :WORD, :content ("worda")}
@@ -125,7 +130,9 @@
   @symbol-table
   (reset-symbol-table!)
   (setup-sym-table-for-test!)
-  (analyze (parse "Find in [ $nonexistent ] from last 2 hours;"))
-  (analyze (parse "Find in [$fra] from last 24 hours;"))
-  (analyze (parse "Find in [$fra $nonexistent] from last 12 hours;"))
-  (analyze (parse "Find in [$fra $ger Biden] from last 6 hours;")))
+  (parse "between 1921-12-24 and 2021-03-12;")
+  (parse "between 1921-12-24T12:00:09 and 2021-03-12T20:18:01z;")
+  (analyze (parse "Find in [ $nonexistent ] from last 2m;"))
+  (analyze (parse "Find in [$fra] from last 24h;"))
+  (analyze (parse "Find in [$fra $nonexistent] from last 12h;"))
+  (analyze (parse "Find in [$fra $ger Biden] from last 6d;")))
