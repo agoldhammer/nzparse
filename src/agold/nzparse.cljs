@@ -114,7 +114,7 @@
   "set up the symbol table for resting"
   []
   (analyze (parse "Define $fra [Macron Castex];"))
-  (analyze (parse "Define $ger [Germany France];")))
+  (analyze (parse "Define $ger [Germany Scholz Baerbock Habeck Lindner];")))
 
 
 (defn -main
