@@ -1,6 +1,7 @@
 (ns query
   (:require [cljs-http.client :as http]
             [cljs.core.async :as a]
+            [cljs.pprint :as pp]
             ["xmlhttprequest" :refer [XMLHttpRequest]]))
 
 ;; for this hack, needed to make cljs-http work properly
@@ -41,7 +42,7 @@
         (let [body (:body response)
               err (:error body)]
           (if (= err 0)
-            (println body)
+            (pp/pprint (:statuses body))
             (println "fetch error:" err)))
         (println "network error"))))
   :fetched)
