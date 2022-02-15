@@ -19,7 +19,7 @@
   [& args]
   (apply str base-url args))
 
-(defn fetch-endpoint
+(defn get-endpoint
   "fetch data from endpoint"
   [endpoint query-param-map]
   (a/go
@@ -29,10 +29,31 @@
       (println (:body response))))
   :fetched)
 
+(defn post-endpoint
+  "fetch data from endpoint"
+  [endpoint query-param-map]
+  (a/go
+    (let [response (a/<! (http/post (make-url endpoint)
+                                    {:with-credentials? false
+                                     :json-params query-param-map}))
+          status (:status response)]
+      (if (= status 200)
+        (let [body (:body response)
+              err (:error body)]
+          (if (= err 0)
+            (println body)
+            (println "fetch error:" err)))
+        (println "network error"))))
+  :fetched)
+
 (comment (make-url "/json/cats")
-         (fetch-endpoint "/json/cats" {})
-         (fetch-endpoint "/json/qry" {:data "'Woerth Sarkozy' -d 3"})
-         (fetch-endpoint "/json/qry" {:data "Macron -s 2022-02-12T12:30:00"}))
+         (get-endpoint "/json/cats" {})
+         (get-endpoint "/json/qry" {:data "'Woerth Sarkozy' -d 3"})
+         (get-endpoint "/json/qry" {:data "Macron -s 2022-02-12T12:30:00"})
+         (post-endpoint "/json/xqry" {:words ["Macron", "Scholz"] :start "2022-02-14T06:00:15"
+                                      :end "2022-02-14T10:00:00"}))
+
+
 
 
 
