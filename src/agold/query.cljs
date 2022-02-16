@@ -42,7 +42,7 @@
         (let [body (:body response)
               err (:error body)]
           (if (= err 0)
-            (pp/pprint (:statuses body))
+            (pp/pprint body)
             (println "fetch error:" err)))
         (println "network error"))))
   :fetched)
@@ -52,7 +52,13 @@
          (get-endpoint "/json/qry" {:data "'Woerth Sarkozy' -d 3"})
          (get-endpoint "/json/qry" {:data "Macron -s 2022-02-12T12:30:00"})
          (post-endpoint "/json/xqry" {:words ["Macron", "Scholz"] :start "2022-02-14"
-                                      :end "2022-02-15"}))
+                                      :end "2022-02-15"})
+         (post-endpoint "/json/xcount" {:words ["Macron", "Scholz"] :start "2022-02-15"
+                                        :end "2022-02-16"})
+         (post-endpoint "/json/xcount" {:words ["Putin", "Poutine", "Ukraine", "Zelensky"] :start "2022-02-15"
+                                        :end "2022-02-16"})
+         (post-endpoint "/json/xcount" {:words ["Scholz"] :start "2022-02-15"
+                                        :end "2022-02-16"}))
 
 
 
