@@ -16,3 +16,4 @@ package-lock.json
 .calva
 out/
 *.code-workspace
+.vscode
