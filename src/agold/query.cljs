@@ -4,10 +4,30 @@
             [cljs.pprint :as pp]
             [process]
             ["fs" :as fs]
+            ["http" :as nhttp]
             ["xmlhttprequest" :refer [XMLHttpRequest]]))
 
 (process/on "uncaughtException", (fn [err origin]
                               (println "Uncaught Exception" err origin)))
+
+(declare out)
+(declare slurp)
+
+(defn svr-resp-fn
+  [req res]
+  (println (.-url req))
+  #_(.writeHead res 200 (clj->js {"Content-Type" "application/json"}))
+  #_(.end res "Hello world!")
+  (condp = (.-url req)
+    "/fetcher.html" (do
+                     (.write res (slurp "resources/fetcher.html"))
+                     (.end res))
+    "/spec.json" (do
+                   (.writeHead res 200 (clj->js {"Content-Type" "application/json"}))
+                   #_(.end res "Hi there")
+                   (.end res @out))
+    (.writeHead res 404 (clj->js {"Content-Type" "text/html"}))))
+
 
 ;; for this hack, needed to make cljs-http work properly
 ;; see http://www.jimlynchcodes.com/blog/solved-xmlhttprequest-is-not-defined-with-clojurescript-coreasync
@@ -22,6 +42,11 @@
   [fname]
   (-> (fs/readFileSync fname)
       (.toString)))
+
+#_(defn spit
+  "write string to file"
+  [fname text]
+  (fs/writeFileSync fname text))
 
 
 (def base-url "http://localhost:5000")
@@ -42,20 +67,46 @@
   :fetched)
 
 (def out (atom ""))
+
+(defn result->json
+  "convert raw xgraph fetch to json, dissociating :time"
+  [result]
+  (.stringify js/JSON (clj->js (dissoc (:result result) :time))))
+
 (defn graphout
   [result]
   #_(reset! out (clj->js (stringify-keys (:result result))))
-  (println (.stringify js/JSON (clj->js (dissoc (:result result) :time))))
+  #_(println (.stringify js/JSON (clj->js (dissoc (:result result) :time))))
+  (println (result->json result))
 
   #_(reset! out result))
 
-(def graph-route {
-                  :endpoint "/json/xgraph"
+#_(defn result->js
+  "convert raw xgraph fetch to js, dissociating :time"
+  [result]
+  (clj->js (dissoc (:result result) :time)))
+
+#_(defn vega->html
+  "fetch vega spec and insert in html page"
+  [result]
+  (let [spec (result->js result)
+        index-templ (slurp "resources/index.templ")
+        new-html (.replace index-templ "VGJSON" spec)]
+    (pp/pprint spec)
+    #_(spit "resources/out.html" new-html)))
+
+(def graph-route {:endpoint "/json/xgraph"
                   :json-params {:subqueries [["Pecresse"] ["Zemmour"] ["Pen"]] :start "2022-02-11"
-                             :interval "1d" :n 10}
+                                :interval "1d" :n 10}
                   :ok-fn graphout
-                  :err-fn println
-})
+                  :err-fn println})
+
+(def vega-route
+  {:endpoint "/json/xgraph"
+   :json-params {:subqueries [["Pecresse"] ["Zemmour"] ["Pen"]] :start "2021-09-01"
+                 :interval "21d" :n 8}
+   :ok-fn #(reset! out (result->json %))
+   :err-fn println})
 
 (defn post-endpoint-x
   "fetch data from route map"
@@ -105,13 +156,46 @@
                                         :end "2022-02-16"})
          (post-endpoint "/json/xcount" {:words ["Scholz"] :start "2022-02-15"
                                         :end "2022-02-16"})
-         (post-endpoint "/json/xgraph" {:subqueries [["Scholz"]["Macron"]["Putin"]] :start "2022-02-15"
+         (post-endpoint "/json/xgraph" {:subqueries [["Scholz"] ["Macron"] ["Putin"]] :start "2022-02-15"
                                         :interval "1d" :n 7})
          (post-endpoint-x graph-route)
          @out
          (println (.stringify js/JSON (clj->js (dissoc (:result @out) :time))))
-         (def index-templ (slurp "resources/index.templ"))
-         (.replace index-templ "VGJSON" "xyz")
+         (post-endpoint-x vega-route)
+
+         (def svr (nhttp/createServer svr-resp-fn))
+         (.listen svr 2626 "127.0.0.1")
+         (.close svr)
+
+         (def left
+           {:endpoint "/json/xgraph"
+            :json-params {:subqueries [["Melenchon"] ["Hidalgo"] ["Taubira"] ["Jadot"]
+                                       ["Roussel"]] :start "2021-09-01"
+                          :interval "30d" :n 7}
+            :ok-fn #(reset! out (result->json %))
+            :err-fn println})
+
+         (def right
+           {:endpoint "/json/xgraph"
+            :json-params {:subqueries [["Melenchon"] ["Hidalgo"] ["Taubira"] ["Jadot"]
+                                       ["Roussel"]] :start "2021-09-01"
+                          :interval "30d" :n 7}
+            :ok-fn #(reset! out (result->json %))
+            :err-fn println})
+
+         (def Ukraine
+           {:endpoint "/json/xgraph"
+            :json-params {:subqueries [["Ukraine"] ["Putin Poutine"] ["Zelensky"]
+                                       ["Donbas" "Donetsk"]]
+                          :start "2021-09-01"
+                          :interval "30d" :n 6}
+            :ok-fn #(reset! out (result->json %))
+            :err-fn println})
+
+         (post-endpoint-x left)
+         (post-endpoint-x Ukraine)
+
+
          )
 
 
