@@ -1,10 +1,12 @@
 (ns query
   (:require [cljs-http.client :as http]
             [cljs.core.async :as a]
+            [cljs.core.async.interop :refer-macros [<p!]]
             [cljs.pprint :as pp]
             [process]
             ["fs" :as fs]
             ["http" :as nhttp]
+            ["open" :as open]
             ["xmlhttprequest" :refer [XMLHttpRequest]]))
 
 (process/on "uncaughtException", (fn [err origin]
@@ -81,19 +83,14 @@
 
   #_(reset! out result))
 
-#_(defn result->js
-  "convert raw xgraph fetch to js, dissociating :time"
+(defn vega-fetch-and-open
+  "ok-fn for vega fetch"
   [result]
-  (clj->js (dissoc (:result result) :time)))
-
-#_(defn vega->html
-  "fetch vega spec and insert in html page"
-  [result]
-  (let [spec (result->js result)
-        index-templ (slurp "resources/index.templ")
-        new-html (.replace index-templ "VGJSON" spec)]
-    (pp/pprint spec)
-    #_(spit "resources/out.html" new-html)))
+  (reset! out (result->json result))
+  (a/go
+   (try
+     (<p! (open "http://127.0.0.1:2626/fetcher.html"))
+     (catch js/Error err (js/console.log (ex-cause err)) ))))
 
 (def graph-route {:endpoint "/json/xgraph"
                   :json-params {:subqueries [["Pecresse"] ["Zemmour"] ["Pen"]] :start "2022-02-11"
@@ -105,7 +102,7 @@
   {:endpoint "/json/xgraph"
    :json-params {:subqueries [["Pecresse"] ["Zemmour"] ["Pen"]] :start "2021-09-01"
                  :interval "21d" :n 8}
-   :ok-fn #(reset! out (result->json %))
+   :ok-fn vega-fetch-and-open
    :err-fn println})
 
 (defn post-endpoint-x
@@ -171,29 +168,35 @@
            {:endpoint "/json/xgraph"
             :json-params {:subqueries [["Melenchon"] ["Hidalgo"] ["Taubira"] ["Jadot"]
                                        ["Roussel"]] :start "2021-09-01"
-                          :interval "30d" :n 7}
-            :ok-fn #(reset! out (result->json %))
+                          :interval "30d" :n 6}
+            :ok-fn vega-fetch-and-open
             :err-fn println})
 
          (def right
            {:endpoint "/json/xgraph"
-            :json-params {:subqueries [["Melenchon"] ["Hidalgo"] ["Taubira"] ["Jadot"]
-                                       ["Roussel"]] :start "2021-09-01"
-                          :interval "30d" :n 7}
-            :ok-fn #(reset! out (result->json %))
+            :json-params {:subqueries [["Pecresse"] ["Zemmour"] ["Pen Marine"] ["Ciotti"]
+                                       ["Bertrand"]] :start "2021-09-01"
+                          :interval "30d" :n 6}
+            :ok-fn vega-fetch-and-open
             :err-fn println})
 
          (def Ukraine
            {:endpoint "/json/xgraph"
-            :json-params {:subqueries [["Ukraine"] ["Putin Poutine"] ["Zelensky"]
+            :json-params {:subqueries [["Ukraine" "Ucraina"] ["Putin Poutine"] ["Zelensky"]
                                        ["Donbas" "Donetsk"]]
                           :start "2021-09-01"
                           :interval "30d" :n 6}
-            :ok-fn #(reset! out (result->json %))
+            :ok-fn vega-fetch-and-open
             :err-fn println})
 
          (post-endpoint-x left)
          (post-endpoint-x Ukraine)
+         (post-endpoint-x right)
+
+         (a/go
+          (try
+            (<p! (open "http:127.0.0.1:2626/fetcher.html"))
+            (catch js/Error err (js/console.log (ex-cause err)))))
 
 
          )
