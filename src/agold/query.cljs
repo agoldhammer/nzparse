@@ -109,7 +109,7 @@
   (def right
     {:endpoint "/json/xgraph"
      :json-params {:subqueries [["Pecresse"] ["Zemmour"] ["Pen Marine"] ["Ciotti"]
-                                ["Bertrand"]] :start "2021-09-01"
+                                ["Bertrand"] ["Barnier"]] :start "2021-09-01"
                    :interval "30d" :n 6}
      :ok-fn vega-fetch-and-open
      :err-fn println})
