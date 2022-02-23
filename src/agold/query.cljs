@@ -10,7 +10,7 @@
             ["xmlhttprequest" :refer [XMLHttpRequest]]))
 
 (process/on "uncaughtException", (fn [err origin]
-                              (println "Uncaught Exception" err origin)))
+                                   (println "Uncaught Exception" err origin)))
 
 (defn slurp
   "read file into string"
@@ -25,8 +25,8 @@
   (println (.-url req))
   (condp = (.-url req)
     "/fetcher.html" (do
-                     (.write res (slurp "resources/fetcher.html"))
-                     (.end res))
+                      (.write res (slurp "resources/fetcher.html"))
+                      (.end res))
     "/spec.json" (do
                    (.writeHead res 200 (clj->js {"Content-Type" "application/json"}))
                    (.end res @out))
@@ -68,9 +68,9 @@
   [result]
   (reset! out (result->json result))
   (a/go
-   (try
-     (<p! (open "http://127.0.0.1:2626/fetcher.html"))
-     (catch js/Error err (js/console.log (ex-cause err)) ))))
+    (try
+      (<p! (open "http://127.0.0.1:2626/fetcher.html"))
+      (catch js/Error err (js/console.log (ex-cause err))))))
 
 (defn post-endpoint-x
   "fetch data from route map"
@@ -110,7 +110,7 @@
     {:endpoint "/json/xgraph"
      :json-params {:subqueries [["Pecresse"] ["Zemmour"] ["Pen Marine"] ["Ciotti"]
                                 ["Bertrand"]] :start "2021-09-01"
-                   :interval "15d" :n 12}
+                   :interval "30d" :n 6}
      :ok-fn vega-fetch-and-open
      :err-fn println})
 
