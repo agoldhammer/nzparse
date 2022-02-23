@@ -12,7 +12,11 @@
 (process/on "uncaughtException", (fn [err origin]
                               (println "Uncaught Exception" err origin)))
 
-(declare slurp)
+(defn slurp
+  "read file into string"
+  [fname]
+  (-> (fs/readFileSync fname)
+      (.toString)))
 
 (def out (atom ""))
 
@@ -37,12 +41,6 @@
 ;; ? this eliminates the annoying message from xhr2, which is no longer required
 (set! js/XMLHttpRequest XMLHttpRequest)
 
-(defn slurp
-  "read file into string"
-  [fname]
-  (-> (fs/readFileSync fname)
-      (.toString)))
-
 (def base-url "http://localhost:5000")
 
 (defn make-url
@@ -59,7 +57,6 @@
                                     :query-params query-param-map}))]
       (println (:body response))))
   :fetched)
-
 
 (defn result->json
   "convert raw xgraph fetch to json, dissociating :time"
@@ -129,7 +126,7 @@
   (def center
     {:endpoint "/json/xgraph"
      :json-params {:subqueries [["Macron"] ["Castex"] ["Philippe"]
-                                ["Woerth"]["Maire"]]
+                                ["Woerth"] ["Maire"]]
                    :start "2021-09-01"
                    :interval "30d" :n 6}
      :ok-fn vega-fetch-and-open
@@ -143,10 +140,7 @@
   (a/go
     (try
       (<p! (open "http:127.0.0.1:2626/fetcher.html"))
-      (catch js/Error err (js/console.log (ex-cause err)))))
-
-
-  )
+      (catch js/Error err (js/console.log (ex-cause err))))))
 
 
 
