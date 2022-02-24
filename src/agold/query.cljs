@@ -102,6 +102,7 @@
     {:endpoint "/json/xgraph"
      :json-params {:subqueries [["Melenchon"] ["Hidalgo"] ["Taubira"] ["Jadot"]
                                 ["Roussel"]] :start "2021-09-01"
+                   :title "Candidates of the Left"
                    :interval "30d" :n 6}
      :ok-fn vega-fetch-and-open
      :err-fn println})
@@ -110,14 +111,26 @@
     {:endpoint "/json/xgraph"
      :json-params {:subqueries [["Pecresse"] ["Zemmour"] ["Pen Marine"] ["Ciotti"]
                                 ["Bertrand"] ["Barnier"]] :start "2021-09-01"
+                   :title "Candidates of the Right"
                    :interval "30d" :n 6}
      :ok-fn vega-fetch-and-open
      :err-fn println})
 
   (def Ukraine
     {:endpoint "/json/xgraph"
-     :json-params {:subqueries [["Ukraine" "Ucraina"] ["Putin" "Poutine"] ["Zelensky"]
-                                ["Donbas" "Donetsk"]]
+     :json-params {:subqueries [["Ukraine" "Ucraina"] ["Putin" "Poutine" "Lavrov" "Lavrow"] ["Zelensky"]
+                                ["Biden" "Blinken"]]
+                   :start "2021-09-01"
+                   :title "Ukraine"
+                   :interval "30d" :n 6}
+     :ok-fn vega-fetch-and-open
+     :err-fn println})
+
+  (def Germany
+    {:endpoint "/json/xgraph"
+     :json-params {:subqueries [["Scholz"] ["Baerbock"] ["Habeck"] ["Merkel"]
+                                ["Lindner"] ["Lauterbach"] ["Merz"] ["Söder"]]
+                   :title "German Leadership"
                    :start "2021-09-01"
                    :interval "30d" :n 6}
      :ok-fn vega-fetch-and-open
@@ -128,6 +141,37 @@
      :json-params {:subqueries [["Macron"] ["Castex"] ["Philippe"]
                                 ["Woerth"] ["Maire"]]
                    :start "2021-09-01"
+                   :title "Macron and Others"
+                   :interval "30d" :n 6}
+     :ok-fn vega-fetch-and-open
+     :err-fn println})
+
+  (def companies
+    {:endpoint "/json/xgraph"
+     :json-params {:subqueries [["Microsoft"] ["Apple"] ["Facebook Meta"] ["Google" "Alphabet"]
+                                ["Amazon"] ["Siemens"] ["Volkswagen"]]
+                   :start "2021-09-01"
+                   :title "Companies"
+                   :interval "30d" :n 6}
+     :ok-fn vega-fetch-and-open
+     :err-fn println})
+
+  (def unions
+    {:endpoint "/json/xgraph"
+     :json-params {:subqueries [["Metall"] ["CGT"] ["CFDT"] ["Ouvriere"]
+                                ["CGIL"]]
+                   :start "2021-09-01"
+                   :title "Unions"
+                   :interval "30d" :n 6}
+     :ok-fn vega-fetch-and-open
+     :err-fn println})
+
+  (def Italy
+    {:endpoint "/json/xgraph"
+     :json-params {:subqueries [["Draghi"] ["Mattarella"] ["Salvini"] ["Meloni"]
+                                ["Conte"] ["Maio"] ["Letta"] ["Renzi"] ["Berlusconi"]]
+                   :start "2021-09-01"
+                   :title "Italian Leadership"
                    :interval "30d" :n 6}
      :ok-fn vega-fetch-and-open
      :err-fn println})
@@ -136,7 +180,10 @@
   (post-endpoint-x Ukraine)
   (post-endpoint-x right)
   (post-endpoint-x center)
-
+  (post-endpoint-x Germany)
+  (post-endpoint-x companies)
+  (post-endpoint-x unions)
+  (post-endpoint-x Italy)
   (a/go
     (try
       (<p! (open "http:127.0.0.1:2626/fetcher.html"))
