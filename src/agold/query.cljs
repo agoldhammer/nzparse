@@ -33,13 +33,12 @@
     (.writeHead res 404 (clj->js {"Content-Type" "text/html"}))))
 
 
-;; ! for this hack, needed to make cljs-http work properly
-;; ? see http://www.jimlynchcodes.com/blog/solved-xmlhttprequest-is-not-defined-with-clojurescript-coreasync
-
+;; ! for this hack, needed to make cljs-http work properly, see:
+;; http://www.jimlynchcodes.com/blog/solved-xmlhttprequest-is-not-defined-with-clojurescript-coreasync
 ;; ? (set! js/XMLHttpRequest (nodejs/require "xhr2"))
-
 ;; ? this eliminates the annoying message from xhr2, which is no longer required
 (set! js/XMLHttpRequest XMLHttpRequest)
+;; ------------------------------------
 
 (def base-url "http://localhost:5000")
 
