@@ -49,7 +49,7 @@
 ;; ------------------------------------
 
 ;; ? For local testing
-(def base-url "http://localhost:5000")
+#_(def base-url "http://localhost:5000")
 
 (defn make-url
   "make url by concatenating args"
@@ -57,15 +57,15 @@
   (str server endpoint))
 
 ;; not used in app
-(defn get-endpoint
-  "fetch data from endpoint"
-  [server endpoint query-param-map]
-  (a/go
-    (let [response (a/<! (http/get (make-url server endpoint)
-                                   {:with-credentials? false
-                                    :query-params query-param-map}))]
-      (println (:body response))))
-  :fetched)
+#_(defn get-endpoint
+    "fetch data from endpoint"
+    [server endpoint query-param-map]
+    (a/go
+      (let [response (a/<! (http/get (make-url server endpoint)
+                                     {:with-credentials? false
+                                      :query-params query-param-map}))]
+        (println (:body response))))
+    :fetched)
 
 (defn result->json
   "convert raw xgraph fetch to json, dissociating :time"

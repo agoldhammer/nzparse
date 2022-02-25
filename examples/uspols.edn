@@ -1,0 +1,6 @@
+{:server "https://us1.noozewire.com"
+ :endpoint "/json/xgraph"
+ :json-params {:subqueries [["Biden"], ["Harris"], ["Trump"]]
+               :title "US Politicians"
+               :start "2022-02-20"
+               :interval "1d" :n 1}}
