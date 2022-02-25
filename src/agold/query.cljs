@@ -2,6 +2,7 @@
   (:require [cljs-http.client :as http]
             [cljs.core.async :as a]
             [cljs.core.async.interop :refer-macros [<p!]]
+            [clojure.edn :as edn]
             #_[cljs.pprint :as pp]
             [process]
             ["fs" :as fs]
@@ -17,6 +18,11 @@
   [fname]
   (-> (fs/readFileSync fname)
       (.toString)))
+
+(defn read-program
+  "read a program file"
+  [fpath]
+  (edn/read-string (slurp fpath)))
 
 (def out (atom ""))
 
@@ -90,6 +96,11 @@
           (err-fn "network error")))))
   :fetched)
 
+(defn -main
+  "I don't do a whole lot ... yet."
+  [& args]
+  (println "I'm here: " args))
+
 (comment
   @out
   (get-endpoint "/json/cats" {})
@@ -117,7 +128,8 @@
 
   (def Ukraine
     {:endpoint "/json/xgraph"
-     :json-params {:subqueries [["Ukraine" "Ucraina"] ["Putin" "Poutine" "Lavrov" "Lavrow"] ["Zelensky"]
+     :json-params {:subqueries [["Ukraine" "Ucraina"] ["Putin" "Poutine" "Lavrov" "Lawrow"]
+                                ["Zelensky" "Selenskij" "Zelenskii"]
                                 ["Biden" "Blinken"]]
                    :start "2021-09-01"
                    :title "Ukraine"
@@ -183,6 +195,8 @@
   (post-endpoint-x companies)
   (post-endpoint-x unions)
   (post-endpoint-x Italy)
+
+  (read-program "ukraine.edn")
   (a/go
     (try
       (<p! (open "http:127.0.0.1:2626/fetcher.html"))

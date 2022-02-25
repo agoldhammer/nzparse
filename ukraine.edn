@@ -1,0 +1,9 @@
+{:endpoint "/json/xgraph"
+ :json-params {:subqueries [["Ukraine" "Ucraina"] ["Putin" "Poutine" "Lavrov" "Lavrow"]
+                            ["Zelensky" "Selenskij" "Zelenskii"]
+                            ["Biden" "Blinken"]]
+               :start "2021-09-01"
+               :title "Ukraine"
+               :interval "30d" :n 6}
+ :ok-fn vega-fetch-and-open
+ :err-fn println}
