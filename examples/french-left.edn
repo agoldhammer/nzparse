@@ -1,0 +1,6 @@
+{:server "https://eu1.noozewire.com"
+ :endpoint "/json/xgraph"
+ :json-params {:subqueries [["Melenchon"] ["Hidalgo"] ["Taubira"] ["Jadot"]
+                            ["Roussel"]] :start "2021-09-01"
+               :title "Candidates of the Left"
+               :interval "30d" :n 6}}

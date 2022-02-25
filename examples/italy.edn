@@ -1,0 +1,7 @@
+{:server "https://eu1.noozewire.com"
+ :endpoint "/json/xgraph"
+ :json-params {:subqueries [["Draghi"] ["Mattarella"] ["Salvini"] ["Meloni"]
+                            ["Conte"] ["Maio"] ["Letta"] ["Renzi"] ["Berlusconi"]]
+               :start "2021-09-01"
+               :title "Italian Leadership"
+               :interval "30d" :n 6}}

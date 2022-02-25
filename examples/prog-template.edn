@@ -1,0 +1,7 @@
+{:server "https://eu1.noozewire.com"
+ :endpoint "/json/xgraph"
+ :json-params {:subqueries [["searchterm"]]
+               :start "datetime"
+               :title "graphtitle"
+               :interval "30d"
+               :n 6}}
