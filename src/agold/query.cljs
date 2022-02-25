@@ -10,8 +10,10 @@
             ["open" :as open]
             ["xmlhttprequest" :refer [XMLHttpRequest]]))
 
-(process/on "uncaughtException", (fn [err origin]
-                                   (println "Uncaught Exception" err origin)))
+#_(process/on "uncaughtException", (fn [err origin]
+                                     (println "Uncaught Exception" err origin)))
+
+(def exit-chan (a/chan))
 
 (defn slurp
   "read file into string"
@@ -27,8 +29,8 @@
 (def out (atom ""))
 
 (defn svr-resp-fn
-  [req res]
-  (println (.-url req))
+  [^js req ^js res]
+  #_(println (.-url req))
   (condp = (.-url req)
     "/fetcher.html" (do
                       (.write res (slurp "resources/fetcher.html"))
@@ -46,18 +48,20 @@
 (set! js/XMLHttpRequest XMLHttpRequest)
 ;; ------------------------------------
 
+;; ? For local testing
 (def base-url "http://localhost:5000")
 
 (defn make-url
   "make url by concatenating args"
-  [& args]
-  (apply str base-url args))
+  [server endpoint]
+  (str server endpoint))
 
+;; not used in app
 (defn get-endpoint
   "fetch data from endpoint"
-  [endpoint query-param-map]
+  [server endpoint query-param-map]
   (a/go
-    (let [response (a/<! (http/get (make-url endpoint)
+    (let [response (a/<! (http/get (make-url server endpoint)
                                    {:with-credentials? false
                                     :query-params query-param-map}))]
       (println (:body response))))
@@ -75,15 +79,16 @@
   (a/go
     (try
       (<p! (open "http://127.0.0.1:2626/fetcher.html"))
+      (a/>! exit-chan :done)
       (catch js/Error err (js/console.log (ex-cause err))))))
 
 (defn post-endpoint-x
   "fetch data from route map"
   [route]
   (let
-   [{:keys [endpoint json-params ok-fn err-fn]} route]
+   [{:keys [server endpoint json-params ok-fn err-fn]} route]
     (a/go
-      (let [response (a/<! (http/post (make-url endpoint)
+      (let [response (a/<! (http/post (make-url server endpoint)
                                       {:with-credentials? false
                                        :json-params json-params}))
             status (:status response)]
@@ -96,111 +101,32 @@
           (err-fn "network error")))))
   :fetched)
 
+(defn exit-fn
+  "exit the process when exit-chan signal received"
+  [svr]
+  (println "Closing graph server and exiting")
+  (js/setTimeout (fn []
+                   (.close svr)
+                   (.exit process)) 4000))
+
 (defn -main
-  "I don't do a whole lot ... yet."
+  "entry point: start graph server and read program specified on cmd line"
   [& args]
-  (println "I'm here: " args))
+  (process/on "uncaughtException", (fn [err origin]
+                                     (println "Uncaught Exception" err origin)))
+  (let [svr (nhttp/createServer svr-resp-fn)
+        prog (first args)]
+    (.listen svr 2626 "127.0.0.1")
+    (println "Reading program file: " prog)
+    (let [params (merge (read-program prog) {:ok-fn vega-fetch-and-open
+                                             :err-fn println})]
+      #_(println params)
+      (post-endpoint-x params))
+    (a/take! exit-chan #(exit-fn svr))))
 
 (comment
-  @out
-  (get-endpoint "/json/cats" {})
-  (def svr (nhttp/createServer svr-resp-fn))
-  (.listen svr 2626 "127.0.0.1")
-  (.close svr)
-
-  (def left
-    {:endpoint "/json/xgraph"
-     :json-params {:subqueries [["Melenchon"] ["Hidalgo"] ["Taubira"] ["Jadot"]
-                                ["Roussel"]] :start "2021-09-01"
-                   :title "Candidates of the Left"
-                   :interval "30d" :n 6}
-     :ok-fn vega-fetch-and-open
-     :err-fn println})
-
-  (def right
-    {:endpoint "/json/xgraph"
-     :json-params {:subqueries [["Pecresse"] ["Zemmour"] ["Pen Marine"] ["Ciotti"]
-                                ["Bertrand"] ["Barnier"]] :start "2021-09-01"
-                   :title "Candidates of the Right"
-                   :interval "30d" :n 6}
-     :ok-fn vega-fetch-and-open
-     :err-fn println})
-
-  (def Ukraine
-    {:endpoint "/json/xgraph"
-     :json-params {:subqueries [["Ukraine" "Ucraina"] ["Putin" "Poutine" "Lavrov" "Lawrow"]
-                                ["Zelensky" "Selenskij" "Zelenskii"]
-                                ["Biden" "Blinken"]]
-                   :start "2021-09-01"
-                   :title "Ukraine"
-                   :interval "30d" :n 6}
-     :ok-fn vega-fetch-and-open
-     :err-fn println})
-
-  (def Germany
-    {:endpoint "/json/xgraph"
-     :json-params {:subqueries [["Scholz"] ["Baerbock"] ["Habeck"] ["Merkel"]
-                                ["Lindner"] ["Lauterbach"] ["Merz"] ["Söder"]]
-                   :title "German Leadership"
-                   :start "2021-09-01"
-                   :interval "30d" :n 6}
-     :ok-fn vega-fetch-and-open
-     :err-fn println})
-
-  (def center
-    {:endpoint "/json/xgraph"
-     :json-params {:subqueries [["Macron"] ["Castex"] ["Philippe"]
-                                ["Woerth"] ["Maire"]]
-                   :start "2021-09-01"
-                   :title "Macron and Others"
-                   :interval "30d" :n 6}
-     :ok-fn vega-fetch-and-open
-     :err-fn println})
-
-  (def companies
-    {:endpoint "/json/xgraph"
-     :json-params {:subqueries [["Microsoft"] ["Apple"] ["Facebook Meta"] ["Google" "Alphabet"]
-                                ["Amazon"] ["Siemens"] ["Volkswagen"]]
-                   :start "2021-09-01"
-                   :title "Companies"
-                   :interval "30d" :n 6}
-     :ok-fn vega-fetch-and-open
-     :err-fn println})
-
-  (def unions
-    {:endpoint "/json/xgraph"
-     :json-params {:subqueries [["Metall"] ["CGT"] ["CFDT"] ["Ouvriere"]
-                                ["CGIL"]]
-                   :start "2021-09-01"
-                   :title "Unions"
-                   :interval "30d" :n 6}
-     :ok-fn vega-fetch-and-open
-     :err-fn println})
-
-  (def Italy
-    {:endpoint "/json/xgraph"
-     :json-params {:subqueries [["Draghi"] ["Mattarella"] ["Salvini"] ["Meloni"]
-                                ["Conte"] ["Maio"] ["Letta"] ["Renzi"] ["Berlusconi"]]
-                   :start "2021-09-01"
-                   :title "Italian Leadership"
-                   :interval "30d" :n 6}
-     :ok-fn vega-fetch-and-open
-     :err-fn println})
-
-  (post-endpoint-x left)
-  (post-endpoint-x Ukraine)
-  (post-endpoint-x right)
-  (post-endpoint-x center)
-  (post-endpoint-x Germany)
-  (post-endpoint-x companies)
-  (post-endpoint-x unions)
-  (post-endpoint-x Italy)
-
-  (read-program "ukraine.edn")
-  (a/go
-    (try
-      (<p! (open "http:127.0.0.1:2626/fetcher.html"))
-      (catch js/Error err (js/console.log (ex-cause err))))))
+  (-main "ukraine.edn")
+  @out)
 
 
 
