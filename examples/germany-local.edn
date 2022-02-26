@@ -1,6 +1,6 @@
 {:server "http://localhost:5000"
  :endpoint "/json/xgraph"
- :json-params {:subqueries [["Biden"] ["Schumer"] ["McConnell"] ["Graham"] ["Pelosi"]]
-               :title "US Politicians"
+ :json-params {:subqueries [["Scholz"] ["Habeck"] ["Baerbock"] ["Lauterbach"] ["Merz"]]
+               :title "German Leadership"
                :start "2021-09-01"
                :interval "30d" :n 6}}

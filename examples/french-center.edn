@@ -1,7 +1,7 @@
 {:server "https://eu1.noozewire.com"
  :endpoint "/json/xgraph"
- :json-params {:subqueries [["Macron"] ["Castex"] ["Philippe"]
-                            ["Woerth"] ["Maire"]]
+ :json-params {:subqueries [["Macron"] ["Castex"] ["Woerth"] ["Philippe"]
+                            ["Maire"]]
                :start "2021-09-01"
                :title "Macron and Others"
                :interval "30d" :n 6}}
