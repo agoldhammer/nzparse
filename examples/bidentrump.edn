@@ -1,0 +1,6 @@
+{:server "http://localhost:5000"
+ :endpoint "/json/xgraph"
+ :json-params {:subqueries [["Biden"]  ["Trump"]]
+               :title "US Politicians"
+               :start "2021-09-01"
+               :interval "30d" :n 6}}

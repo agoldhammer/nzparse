@@ -98,7 +98,8 @@
             (if (= err 0)
               (ok-fn body)
               (err-fn "fetch error:" err)))
-          (err-fn "network error")))))
+          (err-fn (do (str "http error:" status)
+                      (.exit process)))))))
   :fetched)
 
 (defn exit-fn
