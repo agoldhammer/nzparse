@@ -91,15 +91,15 @@
       (let [response (a/<! (http/post (make-url server endpoint)
                                       {:with-credentials? false
                                        :json-params json-params}))
-            status (:status response)]
-        (if (= status 200)
+            success? (:success response)]
+        (if success?
           (let [body (:body response)
                 err (:error body)]
             (if (= err 0)
               (ok-fn body)
               (err-fn "fetch error:" err)))
-          (err-fn (do (str "http error:" status)
-                      (.exit process)))))))
+          (do (println (:error-code response) (:error-text response))
+              (js/setTimeout (.exit process) 2000))))))
   :fetched)
 
 (defn exit-fn
@@ -108,7 +108,7 @@
   (println "Closing graph server and exiting")
   (js/setTimeout (fn []
                    (.close svr)
-                   (.exit process)) 4000))
+                   (js/setTimeout (.exit process))) 4000))
 
 (defn -main
   "entry point: start graph server and read program specified on cmd line"
