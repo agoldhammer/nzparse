@@ -2,6 +2,9 @@
   "name": "nzparse",
   "version": "0.0.1",
   "private": true,
+  "bin": {
+      "xgraph": "./out/script/query.js"
+  },
   "devDependencies": {
     "shadow-cljs": "2.17.0"
   },

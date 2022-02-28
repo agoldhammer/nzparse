@@ -1,0 +1,6 @@
+{:server "https://eu1.noozewire.com"
+ :endpoint "/json/xgraph"
+ :json-params {:subqueries [["Pecresse"] ["Zemmour"] ["Pen Marine"] ["Ciotti"]
+                            ["Bertrand"] ["Barnier"]] :start "2022-02-01"
+               :title "Candidates of the Right"
+               :interval "3d" :n 10}}
