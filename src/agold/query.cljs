@@ -19,8 +19,7 @@
 (defn path-to-fetcher
   "resolve path to fetcher"
   []
-  (let [procdir (js* "__dirname")]
-    (path/resolve procdir "../../resources/fetcher.html")))
+  (path/resolve js/__dirname "../../resources/fetcher.html"))
 
 (defn slurp
   "read file into string"
@@ -126,7 +125,7 @@
         prog (first args)]
     (.listen svr 2626 "127.0.0.1")
     (println "Reading program file: " prog)
-    (println "fetcher path:" (path-to-fetcher))
+    #_(println "fetcher path:" (path-to-fetcher))
     (let [params (merge (read-program prog) {:ok-fn vega-fetch-and-open
                                              :err-fn println})]
       #_(println params)
@@ -134,7 +133,6 @@
     (a/take! exit-chan #(exit-fn svr))))
 
 (comment
-  (js/console.log (js* "__dirname"))
   (-main "ukraine.edn")
   @out)
 
