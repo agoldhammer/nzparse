@@ -5,6 +5,7 @@
             [clojure.edn :as edn]
             #_[cljs.pprint :as pp]
             [process]
+            ["path" :as path]
             ["fs" :as fs]
             ["http" :as nhttp]
             ["open" :as open]
@@ -14,6 +15,12 @@
                                      (println "Uncaught Exception" err origin)))
 
 (def exit-chan (a/chan))
+
+(defn resolve-path
+  "resolve full path from process dir"
+  [fpath]
+  (let [procdir (process/cwd)]
+    (println (path/resolve procdir fpath))))
 
 (defn slurp
   "read file into string"
@@ -33,7 +40,7 @@
   #_(println (.-url req))
   (condp = (.-url req)
     "/fetcher.html" (do
-                      (.write res (slurp "resources/fetcher.html"))
+                      (.write res (slurp (resolve-path "resources/fetcher.html")))
                       (.end res))
     "/spec.json" (do
                    (.writeHead res 200 (clj->js {"Content-Type" "application/json"}))
@@ -126,6 +133,7 @@
     (a/take! exit-chan #(exit-fn svr))))
 
 (comment
+  (resolve-path "resources/fetcher.html")
   (-main "ukraine.edn")
   @out)
 
