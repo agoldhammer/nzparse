@@ -120,7 +120,8 @@
   "entry point: start graph server and read program specified on cmd line"
   [& args]
   (process/on "uncaughtException", (fn [err origin]
-                                     (println "Uncaught Exception" err origin)))
+                                     (println "Uncaught Exception" err origin)
+                                     (.exit process)))
   (let [svr (nhttp/createServer svr-resp-fn)
         prog (first args)]
     (.listen svr 2626 "127.0.0.1")
