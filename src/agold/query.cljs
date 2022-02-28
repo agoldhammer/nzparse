@@ -16,11 +16,11 @@
 
 (def exit-chan (a/chan))
 
-(defn resolve-path
-  "resolve full path from process dir"
-  [fpath]
-  (let [procdir (process/cwd)]
-    (println (path/resolve procdir fpath))))
+(defn path-to-fetcher
+  "resolve path to fetcher"
+  []
+  (let [procdir (js* "__dirname")]
+    (path/resolve procdir "../../resources/fetcher.html")))
 
 (defn slurp
   "read file into string"
@@ -40,7 +40,7 @@
   #_(println (.-url req))
   (condp = (.-url req)
     "/fetcher.html" (do
-                      (.write res (slurp (resolve-path "resources/fetcher.html")))
+                      (.write res (slurp (path-to-fetcher)))
                       (.end res))
     "/spec.json" (do
                    (.writeHead res 200 (clj->js {"Content-Type" "application/json"}))
@@ -126,6 +126,7 @@
         prog (first args)]
     (.listen svr 2626 "127.0.0.1")
     (println "Reading program file: " prog)
+    (println "fetcher path:" (path-to-fetcher))
     (let [params (merge (read-program prog) {:ok-fn vega-fetch-and-open
                                              :err-fn println})]
       #_(println params)
@@ -133,7 +134,7 @@
     (a/take! exit-chan #(exit-fn svr))))
 
 (comment
-  (resolve-path "resources/fetcher.html")
+  (js/console.log (js* "__dirname"))
   (-main "ukraine.edn")
   @out)
 
