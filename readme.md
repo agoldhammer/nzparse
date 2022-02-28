@@ -1,11 +1,25 @@
-# nzparse
+# xgraph -- view graphs constructed by querying the nooze database
 
-A program to query nooze data and present in various forms
+## installation
 
-1. nzparse is the query parser
+npm i -g
 
-2. work on the query language is still in progress
+## use
 
-3. query.cljs is the query engine. Queries go to the local copy of the nzdb data. Vega-lite graph data are returned
+xgraph progfile.edn
 
-4. The graph is served up by an internal node server and displayed in fetcher.html
+## program files
+
+A program file looks like this:
+
+```clojure
+{:endpoint "/json/xgraph"
+ :server "https://eu1.noozewire.com"
+ :json-params {:subqueries [["Ukraine" "Ucraina"] ["Putin" "Poutine" "Lavrov" "Lavrow"]
+                            ["Zelensky" "Selenskij" "Zelenskii"]
+                            ["Biden" "Blinken"]]
+               :start "2021-09-01"
+               :title "Ukraine"
+               :interval "30d" :n 6}}
+
+```
